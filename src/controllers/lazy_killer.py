@@ -10,15 +10,24 @@ class LazyKillerController(ABSController):
             return 
         my_tank = field.data["tanks"].get(field.my_tank_id)
         if not my_tank:
-            return
+            return 
         if len(field.data["tanks"])<=1:
-            print("No tanks found in area. Waiting enemies")
-            return
+            # print("No tanks found in area. Waiting enemies")
+            return {"rotate":0, "b_rotate":0, "move":0, "fire":0}
 
         # Получение соперника
-        enemy = next(iter(field.data["tanks"]))
-        while enemy == my_tank["id"]:
-            enemy = next(enemy)
+        try:
+            e_iter = iter(field.data["tanks"])
+            enemy = next(e_iter)
+            # print(field.data["tanks"])
+            while enemy == my_tank["id"]:
+                # print(enemy)
+                enemy = next(e_iter)
+        except StopIteration as e:
+            # print("No enemies in area")
+            return {"rotate":0, "b_rotate":0, "move":0, "fire":0}
+
+
         # print("ENEMY FOUND:", enemy, my_tank["id"])
 
         enemy_tank = field.data["tanks"][enemy]
@@ -37,7 +46,7 @@ class LazyKillerController(ABSController):
         if dy<0:
             target_b_az+=180
 
-        print(target_b_az, my_tank["napr"]["b_az"], abs(my_tank["napr"]["b_az"] - target_b_az))
+        # print(target_b_az, my_tank["napr"]["b_az"], abs(my_tank["napr"]["b_az"] - target_b_az))
         if abs(my_tank["napr"]["b_az"] - target_b_az)>ROT_LOSS:
             return {"rotate":0, "b_rotate":1, "move":0, "fire":0}
         else:
